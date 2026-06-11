@@ -1,0 +1,2 @@
+modelo;tipo_duracion;formula_duracion;filas_operacion;entrenamiento_duracion;diferencia_formula_abs_max
+CCP_formula_fija;CCP_formula_fija;(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE;11166;False;1.8189894035458565e-12

@@ -1,0 +1,12 @@
+{
+  "segmentos_plan": 14533,
+  "operaciones_planificadas_unicas": 10641,
+  "operaciones_esperadas": 10641,
+  "operaciones_faltantes": 0,
+  "solapes_recurso": 0,
+  "errores_precedencia": 0,
+  "recurso_fuera_de_grupo": 0,
+  "errores_calendario_laboral": 0,
+  "valido": true,
+  "muestra_errores": []
+}

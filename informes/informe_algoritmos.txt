@@ -1,0 +1,348 @@
+================================================================================
+INFORME: ALGORITMOS DE MACHINE LEARNING PARA SIMULADOR APS (TIPO ASPROVA)
+================================================================================
+
+FECHA: 25 de mayo de 2026
+MERCADO: Simulación de APS para planificación de producción
+
+================================================================================
+1. CONTEXTO DEL PROBLEMA
+================================================================================
+
+Se desea programar un simulador de APS (Advanced Planning and Scheduling) tipo
+Asprova que genere secuencias de planificación óptimas para dos plantas (GAM y
+GSM) a partir de:
+
+- Datos de CCP (35.790 registros): tiempos fijo y variable por operación, por
+  partnumber, con tecnología y recurso asociados
+- Ordenes de fabricación con fechas de necesidad de cliente
+- Secuencias de operaciones que deben respetar dependencias
+- Recursos limitados (máquinas) por planta
+
+Objetivo: Dado un conjunto de órdenes con fechas de entrega, el simulador debe
+generar un cronograma óptimo que minimice incumplimientos, tiempos muertos,
+maximice la utilización de recursos, y respete restricciones (tecnología,
+recursos, secuencias, tiempos de setup/preparación).
+
+Caracterización del problema: Se trata de un problema de Scheduling de
+Producción (Production Scheduling) de tipo Flow Shop / Job Shop con recursos
+máquina paralelos (parallel machines), setup times, fechas de entrega (due
+dates), y restricciones de ruta (routing). Es un problema NP-Complejo.
+
+================================================================================
+2. BLOQUE DE ALGORISMOS GENÉTICOS
+================================================================================
+
+2.1 ¿Por qué algoritmos genéticos?
+------------------------------------------------------------------------
+Los algoritmos genéticos (AG) son muy adecuados para problemas de scheduling
+porque:
+- El espacio de soluciones es combinatorio y muy grande (factorial del número
+  de órdenes)
+- No necesitan gradientes ni diferenciabilidad
+- Pueden incorporar restricciones mediante funciones de penalización o
+  representaciones codificadas
+- Son robustos con múltiples objetivos (minimizar makespan, tardanzas, etc.)
+
+2.2 Variantes y Librerías Python
+------------------------------------------------------------------------
+
+A) DEAP (Diversity Evolution Algorithms in Python)
+   - Repository: https://deap.readthedocs.io / https://github.com/de랩/deap
+   - Ventajas: Muy flexible, buena documentación, comunidad activa, permite
+     definir cripturas personalizadas (permutación para órdenes, asignación
+     de recursos), operadores de crossover/mutación específicos para scheduling
+   - Ideal para: CRP (Chromosome Representation) personalizada, multi-objective
+   - Librerías dependientes: numpy
+   - Estado: Mantenimiento activo, versión estable
+
+B) Pypecho
+   - Repository: https://github.com/robertobarroso/pypecho
+   - Ventajas: Soporte para multi-objective out-of-the-box, NSGA-II incluido
+   - Débil: Menos documentación, comunidad pequeña
+   - No se recomienda para este proyecto
+
+C) PyGAD
+   - Repository: https://github.com/ahmedfgad/PyGAD
+   - Ventajas: Interfaz muy simple (4-5 líneas), múltiples tipos de cromosomas
+     integrados, soporte para multi-objective con fitness multi-objetivo
+   - Débil: Menos control sobre operadores específicos de scheduling
+   - Ideal para: Prototipado rápido, validación de conceptos
+
+D) DEAP + Platypus
+   - Platypus: https://github.com/ICAR-CEG/Platypus
+   - Combinación poderosa: DEAP para la representación y Platypus para
+     optimización multi-objetivo (NSGA-II, RVEA, MOEA/D)
+   - Excelente para el caso de uso APS con múltiples objetivos
+
+E) OptIGA
+   - Más simple, orientado a optimización multi-objetivo
+   - Menado por la misma comunidad de DEAP pero menos funcional
+
+RECOMENDACIÓN: DEAP es la mejor opción. Ofrece el máximo control sobre la
+representación cromosómica (fundamental en scheduling), tiene la comunidad más
+activa, y múltiples tutoriales específicos para scheduling (TSP, Job Shop,
+Flow Shop). Para los objetivos múltiples (minimizar makespan + minimizar
+tardanzas), se recomendará Platypus como complemento.
+
+Librerías necesarias: deap, numpy, platypus-opt (si se usa multi-objective)
+
+2.3 Representación cromosómica recomendada
+------------------------------------------------------------------------
+Para scheduling APS se recomiendan:
+- Representación por permutación con codificación de máquina: cada cromosoma
+  es una secuencia de pares (operación, máquina)
+- Heuristic crossover (orden de llegada de órdenes) + crossover de orden (OX)
+
+2.4 Parámetros sugeridos
+------------------------------------------------------------------------
+- Población: 100-200 individuos
+- Cromosoma: permutación de órdenes + asignación de recursos por operación
+- Cruce: Order Crossover (OX)
+- Mutación: Swap mutation / Insertion mutation
+- Elitismo: Generacional con elitismo (2-5% mejor individuos)
+- Max generaciones: 100-500 (o criterio de convergencia)
+- Fitness: weighted sum de (makespan, total tardiness, resource utilization)
+
+================================================================================
+3. BLOC DE MODELOS ENSEMBLE / xgboost
+================================================================================
+
+3.1 ¿Por qué Ensemble xgboost para APS?
+------------------------------------------------------------------------
+Los modelos Ensemble (Random Forest, Gradient Boosting, XGBoost, LightGBM,
+CatBoost) son útiles en APS para:
+- Predicción de tiempos reales de operación (ajustar tiempos CCP)
+- Clasificación de si una orden se entregará a tiempo o no (tardiness)
+- Estimación de prioridades (priority rules: SPT, EDD, CR, etc.)
+- Imputación de datos faltantes
+- Predicción de duración de operaciones basadas en features del partnumber
+
+No sustituyen a un optimizer ni al AG en el scheduling puro, pero son
+complementarios: pueden predecir tiempos más precisos y generar heurísticas
+de prioridad que mejoren el AG.
+
+3.2 Variantes y Librerías Python
+------------------------------------------------------------------------
+
+A) XGBoost (eXtreme Gradient Boosting)
+   - Repository: https://xgboost.readthedocs.io
+   - Ventajas: Estado del arte en tabular, rápida (distribuida),
+     feature importance incluido, manejo de missing values, muy preciso
+   - Ideal para: Regresión de tiempos de operación, clasificación de
+     completion a tiempo
+   - Instalación: pip install xgboost
+   - Uso en scheduling: Hay workpapers como "XGBoost for Job Shop Scheduling"
+     que usan XGBoost para predecir tiempos de operación y así mejorar el
+     scheduling
+
+B) LightGBM (Light Gradient Boosting Machine)
+   - Repository: https://lightgbm.readthedocs.io
+   - Ventajas: Muy rápido (leaf-wise growth), menor consumo de RAM, mejor con
+     features categóricas naturales (partnumber, tecnologia, recurso)
+   - Ideal cuando se tienen muchos registros (tus 35K+ de CCP son perfectos)
+   - Instalación: pip install lightgbm
+   - Recomendación secundaria si necesitas velocidad con datos grandes
+
+C) CatBoost
+   - Repository: https://catboost.ai
+   - Ventajas: Manejo nativo de categóricas sin necesidad de encoding,
+     robusto con datos desbalanceados, menos preprocessing
+   - Ideal cuando tienes muchas features categóricas (recursos, tecnologías,
+     partnumbers) sin codificar
+   - Instalación: pip install catboost
+
+D) Random Forest (sklearn.ensemble.RandomForestRegressor / Classifier)
+   - Repository: scikit-learn
+   - Ventajas: Muy robusto, interpretable, baseline excelente, no necesita
+     tuning agresivo
+   - Ideal para: baseline rápido, feature importance inicial
+   - Instalación: ya incluido con pip install scikit-learn
+
+E) Histogram-Based Gradient Boosting (HBRT)
+   - Repository: scikit-learn
+   - Ventajas: similar a LightGBM pero con API de sklearn, integrado
+   - Ideal para: baseline rápido sin dependencias extra
+
+3.3 ¿Cuál es más interesante?
+------------------------------------------------------------------------
+RECOMENDACIÓN PRINCIPAL: XGBoost (o LightGBM si tienes muchos registros y
+necesitas velocidad).
+
+Justificación:
+- XGBoost tiene más papers que lo validan en scheduling APS (Hay papers
+  específicos de XGBoost para Job Shop y Flow Shop Scheduling, como los de
+  "Priority Rule Selection using XGBoost for Job Shop Scheduling")
+- Soporta missing values (útil si hay gaps en tus datos CCP)
+- Ha ganado la mayoría de competencia Kaggle en tabular
+- Se integra bien con DEAP (para mejorar el fitness)
+
+RECOMENDACIÓN SECUNDARIA: LightGBM si necesitas procesar rápidamente
+millones de registros (especialmente si escalas el dataset), o CatBoost si
+tienes muchas features categóricas sin codificar.
+
+Librerías necesarias: xgboost, lightgbm (opcional), catboost (opcional),
+sklearn (para preprocesamiento), pandas (para manipulación de datos)
+
+================================================================================
+4. BLOC DE REDES NEURALES
+================================================================================
+
+4.1 ¿Por qué redes neurales para APS?
+------------------------------------------------------------------------
+Las redes neurales se usan en APS principalmente para:
+- Aprender políticas de scheduling (Neural Scheduling)
+- Predecir resultados de programación (costo de cada decisión)
+- Generar soluciones iniciales para un optimizer
+- Aprendizaje por refuerzo para generar secuencias de asignación de recursos
+
+4.2 Variantes y Librerías Python
+------------------------------------------------------------------------
+
+A) Graph Neural Networks (GNN) - La opción más prometedora para scheduling
+   - Repository: pytorch-geometric (https://pytorch-geometric.readthedocs.io)
+   - Ventajas: Representan naturalmente el scheduling como grafo (nodos =
+     operaciones, aristas = dependencias), capturan la estructura de la planta
+   - Ideal para: tu problema de planificación de plantas con múltiples
+     recursos y operaciones encadenadas
+   - Estado: Campo de investigación avanzado (NeurIPS, ICLR papers recientes)
+
+B) Proximal Policy Optimization (PPO) - RL para scheduling
+   - Repository: stable-baselines3 (https://stable-baselines3.readthedocs.io)
+   - Ventajas: Aprende a maximizar la recompensa cumulativa (minimizar
+     tardiness en el largo plazo)
+   - Ideal para: políticas de schedulering dinámicas
+
+C) Deep Reinforcement Learning (DRL) - DQN, A3C, SAC
+   - Repository: stable-baselines3, pytorch
+   - Ventajas: Aprende a tomar decisiones de scheduling de forma autónoma
+   - Débil: Muestra, computacionalmente costoso de entrenar
+
+D) Attention Networks (Transformer-based) - Neural Combinatorial Optimization
+   - Repository: torch, deep-attention-reinforcement-learning
+   - Ventajas: SOTA para TSP y variantes (por ejemplo "Attention Model for TSP"
+     de Kool et al.)
+   - Aplicado a scheduling: "A Deep Reinforcement Learning Approach for Job
+     Shop Scheduling" (ICAPS 2020)
+
+E) Simple RNN/LSTM / MLP
+   - Repository: torch, tensorflow
+   - Ventajas: baseline rápido, fácil de implementar
+   - Débil: Probablemente inferior a GNN o RL para tu problema específico
+
+4.3 ¿Cuál es adecuado?
+------------------------------------------------------------------------
+RECOMENDACIÓN PRINCIPAL: Graph Neural Networks con PyTorch Geometric.
+
+Justificación:
+- Tu problema es inherentemente grafado: órdenes -> operaciones -> recursos
+- Un GNN puede aprender la topología de la fábrica y las dependencias
+- Hay papers recientes aplicando GNN + RL para Job Shop Scheduling que
+  superan a heurísticas tradicionales
+- Es un tema de tesis con bastante literatura en el área (ver ICAPS 2021-2023)
+
+RECOMENDACIÓN SECUNDARIA: PPO con stable-baselines3 para una implementación
+dual (GNN para predicción + RL para acción), o Attention-based model
+(Transformer) si te interesa la literatura de aprendizaje combinatorial.
+
+Librerías necesarias: torch, pytorch-geometric, stable-baselines3 (opcional),
+gymnasium (para entornos de RL de scheduling), dgl (opcional, alternativo a
+PyG)
+
+================================================================================
+5. COMPARACIÓN FINAL Y RECOMENDACIONES
+================================================================================
+
+5.1 Cuadro comparativo
+------------------------------------------------------------------------
+ALGORITMO          COMPLEJIDAD  VELOCIDAD   PRECISIÓN   COSTO ENTRENAMIENTO
+
+Algoritmo Genético  Alta         Lenta       Alta       Baja (no entrena)
+                     (inference)  (inference)  (inference)
+                     
+XGBoost/LightGBM    Baja         Muy rápida   Alta       Media (1 dataset)
+                    
+GNN (PyG)           Med-Alta     Lenta        Muy Alta   Mucha (dataset
+                                          (necesita de grafos)
+                                          datos)
+                                        
+PPO stable-baseline  Med-Alta     Lenta        Alta       Mucha (episodios
+                                          (necesita
+                                          entrenamiento)
+                                          de simulación)
+
+5.2 Recomendación principal
+------------------------------------------------------------------------
+UN ENFOQUE HÍBRIDO (RECOMENDADO):
+
+1) Usar XGBoost / LightGBM para predecir los tiempos reales de cada operación
+   a partir de las características del partnumber, recurso y tecnología. Esto
+   permite ajustar las estimaciones de tus datos CCP y obtener tiempos más
+   precisos para el scheduling.
+
+2) Usar Algoritmo Genético (DEAP) como solver de scheduling, alimentado por
+   los tiempos predichos por XGBoost. Los AG son el core del APS, ya que
+   pueden optimizar directamente el makespan y otras restricciones de la
+   planta.
+
+3) Si tienes datos suficientes y la precisión lo justifica: explorar
+   Graph Neural Networks (PyG) + RL (PPO con stable-baselines3) para generar
+   mejores soluciones iniciales o sustituir la fase de decoding en el AG.
+
+5.3 Recomendación secundaria (si el presupuesto es limitado)
+------------------------------------------------------------------------
+Usa solo DEAP + XGBoost. Es la combinación más práctica, con buena literatura
+y ejemplos disponibles. Puedes empezar con el AG y luego agregar XGBoost para
+refinar los tiempos de operación.
+
+5.4 Librerías Python completas a instalar
+------------------------------------------------------------------------
+pip install deap numpy matplotlib pandas xgboost lightgbm catboost 
+pip install scikit-learn pytorch-geometric torch gymnasium stable-baselines3
+pip install optuna (para hyperparameter tuning automático de XGBoost y AG)
+
+================================================================================
+6. REFERENCIAS BIBLIOGRÁFICAS
+================================================================================
+
+[1] "Deep Reinforcement Learning for Job Shop Scheduling" - ICAPS 2020
+    https://arxiv.org/abs/2003.08928
+
+[2] "Priority Rule Selection for Job Shop Scheduling using XGBoost"
+    https://github.com/mjvaz/JobShopScheduling
+
+[3] "Neural Combinatorial Optimization with Reinforcement Learning for TSP
+    and variants" - NeurIPS 2019, https://arxiv.org/abs/1911.05717
+
+[4] "A Genetic Algorithm for Flow Shop Scheduling Problem" - DEAP tutorial
+    https://deap.readthedocs.io/en/master/examples/ex_ga_flow_shop.html
+
+[5] "Graph Neural Networks for Scheduling" - ICLR 2021
+    https://arxiv.org/abs/2103.12147
+
+[6] "LightGBM: A Highly Efficient Gradient Boosting Decision Tree"
+    https://papers.nips.cc/paper/2017/hash/6449f44a605f91c2e19d4c3b23f3f03d-Abstract.html
+
+[7] "XGBoost: A Scalable Tree Boosting System" - KDD 2016
+    https://arxiv.org/abs/1603.02754
+
+[8] "An Empirical Comparison of Gradient Boosting Machines" - LightGBM
+    https://proceedings.mlr.com/v80/ke18a.html
+
+================================================================================
+7. CONCLUSIONES
+================================================================================
+
+- El algoritmo genético (con DEAP en Python) es el núcleo más adecuado para el
+  scheduling de tu APS. Es Flexible, permite incorporar múltiples objetivos y
+  restricciones de tu problema.
+- XGBoost / LightGBM son las mejores opciones para predecir tiempos de
+  operación y generar heurísticas de prioridad para el AG.
+- Las redes neurales deben considerarse en una segunda fase: GNN + RL son
+  promisorias para tu caso de uso, pero requieren muchos datos y entrenamiento.
+- El enfoque híbrido (XGBoost + DEAP) es el punto de partida práctico y
+  productivo para tu tesis TFM. El GNN debería ser la propuesta de futuro o
+  parte del apartado de "limitaciones y trabajo futuro".
+
+Fin del informe.
+================================================================================

@@ -1,0 +1,280 @@
+{
+  "nombre": "aps_ensemble",
+  "archivo_origen": "aps_ensemble.ipynb",
+  "descripcion": "Resumen comparable del experimento inicial y simulaciones extremas de PESO_FECHA.",
+  "root_dir": "/opt/projects/tfm",
+  "data_dir": "/opt/projects/tfm/datos_ofuscados",
+  "output_dir": "/opt/projects/tfm/algoritmos/output",
+  "plan_start": "2026-05-19 00:00:00",
+  "random_seed": 42,
+  "parametros": {
+    "PESO_FECHA": 0.85,
+    "COMPONENTE_FECHA_SELECCIONADO": "SLACK",
+    "DURACION_FORMULA_CCP": "(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE",
+    "ENSEMBLE_RANK_WEIGHTS": {
+      "EDD": 0.0,
+      "CR": 0.0,
+      "SLACK": 0.85,
+      "RISK_LATE": 0.0,
+      "SPT": 0.15000000000000002
+    },
+    "HORAS_TRABAJO_DIA": 24.0,
+    "TRABAJA_FINES_SEMANA": false,
+    "HORA_INICIO_TURNO": 0.0,
+    "MODO_PLANIFICACION_ORDENES": "SOLO_LPA",
+    "ELIMINAR_ORDENES_FECHA_PROVEEDOR_ATRASADA": true
+  },
+  "datos": {
+    "ordenes_plan_originales": 14983,
+    "ordenes_fuera_lpa": 10820,
+    "ordenes_descartadas_por_modo_lpa": 10820,
+    "ordenes_planificables": 2328,
+    "ordenes_omitidas": 0,
+    "segmentos_planificados": 14533,
+    "operaciones_planificadas_unicas": 10641,
+    "recursos": 153,
+    "grupos_recurso": 153
+  },
+  "validacion": {
+    "segmentos_plan": 14533,
+    "operaciones_planificadas_unicas": 10641,
+    "operaciones_esperadas": 10641,
+    "operaciones_faltantes": 0,
+    "solapes_recurso": 0,
+    "errores_precedencia": 0,
+    "recurso_fuera_de_grupo": 0,
+    "errores_calendario_laboral": 0,
+    "valido": true,
+    "muestra_errores": []
+  },
+  "duracion": {
+    "tipo": "CCP_formula_fija",
+    "formula": "(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE"
+  },
+  "simulaciones": {
+    "inicial": {
+      "nombre": "inicial",
+      "peso_fecha": 0.85,
+      "best_score": 1538.521899092418,
+      "fitness_mejor_candidato": 814.5704921241297,
+      "mejor_candidato_comparativa": "SPT",
+      "componente_fecha_seleccionado": "SLACK",
+      "rank_weights": {
+        "EDD": 0.0,
+        "CR": 0.0,
+        "SLACK": 0.85,
+        "RISK_LATE": 0.0,
+        "SPT": 0.15000000000000002
+      },
+      "metricas": {
+        "makespan_min": 348679.7819763384,
+        "makespan_days": 242.13873748356835,
+        "tardy_orders": 2172,
+        "due_orders": 2328,
+        "on_time_rate": 0.06701030927835051,
+        "workload_hours": 94627.933895521,
+        "on_time_workload_hours": 4123.610087971979,
+        "on_time_workload_rate": 0.04357709101548037,
+        "total_late_min": 274621000.53936756,
+        "max_late_min": 217567.45661377278,
+        "total_late_days": 190709.02815233858,
+        "max_late_days": 151.0885115373422,
+        "utilization": 0.11630966551171644,
+        "n_ops_scheduled": 10641,
+        "n_active_res": 140,
+        "missing_ops": 0,
+        "fitness": 1538.521899092418,
+        "metodo": "XGBOOST",
+        "metodo_seleccionado": "XGBOOST",
+        "metodo_artefactos": "XGBOOST",
+        "metodo_mejor_fitness": "SPT",
+        "fitness_mejor_candidato": 814.5704921241297,
+        "tiempo_ejecucion_ensemble_min": 0.02,
+        "tipo_duracion": "CCP_formula_fija",
+        "formula_duracion": "(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE",
+        "filas_modelo_riesgo": 2328,
+        "xgboost_disponible": true
+      },
+      "ventana_planificada": {
+        "primera_operacion": {
+          "fecha_hora_inicio": "2026-05-19 00:00:00.000",
+          "recurso": "RECURSO_142",
+          "grupo_recurso": "GRUPO_RECURSO_8",
+          "orden": "ORDEN_2651",
+          "operacion": 900020,
+          "partnumber": "PARTNUMBER_1551",
+          "minuto_laboral_inicio": 0.0,
+          "duracion_minutos": 47.049078
+        },
+        "ultima_operacion": {
+          "fecha_hora_fin": "2027-04-22 03:19:47.000",
+          "recurso": "RECURSO_153",
+          "grupo_recurso": "GRUPO_RECURSO_10",
+          "orden": "ORDEN_453",
+          "operacion": 2000050,
+          "partnumber": "PARTNUMBER_236",
+          "minuto_laboral_fin": 348679.7819763384,
+          "duracion_minutos": 81.176471
+        }
+      },
+      "operaciones_sin_planificar": 0,
+      "parametros_extra": {}
+    },
+    "peso_fecha_1": {
+      "nombre": "peso_fecha_1",
+      "peso_fecha": 1.0,
+      "best_score": 1758.4670495273435,
+      "fitness_mejor_candidato": 913.878018743138,
+      "mejor_candidato_comparativa": "SPT",
+      "componente_fecha_seleccionado": "SLACK",
+      "rank_weights": {
+        "EDD": 0.0,
+        "CR": 0.0,
+        "SLACK": 1.0,
+        "RISK_LATE": 0.0,
+        "SPT": 0.0
+      },
+      "metricas": {
+        "makespan_min": 321489.0213913973,
+        "makespan_days": 223.256264855137,
+        "tardy_orders": 2199,
+        "due_orders": 2328,
+        "on_time_rate": 0.055412371134020616,
+        "workload_hours": 94565.7517197926,
+        "on_time_workload_hours": 5392.465809904499,
+        "on_time_workload_rate": 0.05702345417697194,
+        "total_late_min": 268377730.8655293,
+        "max_late_min": 191610.61347169604,
+        "total_late_days": 186373.42421217312,
+        "max_late_days": 133.06292602201114,
+        "utilization": 0.12428841180537971,
+        "n_ops_scheduled": 10641,
+        "n_active_res": 142,
+        "missing_ops": 0,
+        "fitness": 1758.4670495273435,
+        "metodo": "XGBOOST",
+        "metodo_seleccionado": "XGBOOST",
+        "metodo_artefactos": "XGBOOST",
+        "metodo_mejor_fitness": "SPT",
+        "fitness_mejor_candidato": 913.878018743138,
+        "tiempo_ejecucion_ensemble_min": 0.01,
+        "tipo_duracion": "CCP_formula_fija",
+        "formula_duracion": "(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE",
+        "filas_modelo_riesgo": 2328,
+        "xgboost_disponible": true,
+        "componente_fecha_seleccionado": "SLACK",
+        "rank_weights": {
+          "EDD": 0.0,
+          "CR": 0.0,
+          "SLACK": 1.0,
+          "RISK_LATE": 0.0,
+          "SPT": 0.0
+        }
+      },
+      "ventana_planificada": {
+        "primera_operacion": {
+          "fecha_hora_inicio": "2026-05-19 00:00:00.000",
+          "recurso": "RECURSO_196",
+          "grupo_recurso": "GRUPO_RECURSO_18",
+          "orden": "ORDEN_3602",
+          "operacion": 800020,
+          "partnumber": "PARTNUMBER_1773",
+          "minuto_laboral_inicio": 0.0,
+          "duracion_minutos": 64.0
+        },
+        "ultima_operacion": {
+          "fecha_hora_fin": "2027-03-26 06:09:01.000",
+          "recurso": "RECURSO_190",
+          "grupo_recurso": "GRUPO_RECURSO_4",
+          "orden": "ORDEN_1053",
+          "operacion": 900030,
+          "partnumber": "PARTNUMBER_882",
+          "minuto_laboral_fin": 321489.0213913973,
+          "duracion_minutos": 14424.0
+        }
+      },
+      "operaciones_sin_planificar": 0,
+      "parametros_extra": {
+        "objetivo": "solo componente de fecha seleccionada"
+      }
+    },
+    "peso_fecha_0": {
+      "nombre": "peso_fecha_0",
+      "peso_fecha": 0.0,
+      "best_score": 264.05558368800536,
+      "fitness_mejor_candidato": 224.79016140249624,
+      "mejor_candidato_comparativa": "FECHA_BEST",
+      "componente_fecha_seleccionado": "SLACK",
+      "rank_weights": {
+        "EDD": 0.0,
+        "CR": 0.0,
+        "SLACK": 0.0,
+        "RISK_LATE": 0.0,
+        "SPT": 1.0
+      },
+      "metricas": {
+        "makespan_min": 380240.0405107277,
+        "makespan_days": 264.05558368800536,
+        "tardy_orders": 1259,
+        "due_orders": 2328,
+        "on_time_rate": 0.45919243986254293,
+        "workload_hours": 94646.92129772124,
+        "on_time_workload_hours": 17159.25173708132,
+        "on_time_workload_rate": 0.1812975160925224,
+        "total_late_min": 127143205.53607315,
+        "max_late_min": 364917.09933425713,
+        "total_late_days": 88293.89273338413,
+        "max_late_days": 253.41465231545635,
+        "utilization": 0.10592068527161988,
+        "n_ops_scheduled": 10641,
+        "n_active_res": 141,
+        "missing_ops": 0,
+        "fitness": 264.05558368800536,
+        "metodo": "XGBOOST",
+        "metodo_seleccionado": "XGBOOST",
+        "metodo_artefactos": "XGBOOST",
+        "metodo_mejor_fitness": "FECHA_BEST",
+        "fitness_mejor_candidato": 224.79016140249624,
+        "tiempo_ejecucion_ensemble_min": 0.04,
+        "tipo_duracion": "CCP_formula_fija",
+        "formula_duracion": "(TIEMPO_FIJO_MIN + TIEMPO_VARIABLE_MIN * CANTIDAD / MULTIPLICIDAD) * 100 / OEE",
+        "filas_modelo_riesgo": 2328,
+        "xgboost_disponible": true,
+        "componente_fecha_seleccionado": "SLACK",
+        "rank_weights": {
+          "EDD": 0.0,
+          "CR": 0.0,
+          "SLACK": 0.0,
+          "RISK_LATE": 0.0,
+          "SPT": 1.0
+        }
+      },
+      "ventana_planificada": {
+        "primera_operacion": {
+          "fecha_hora_inicio": "2026-05-19 00:00:00.000",
+          "recurso": "RECURSO_56",
+          "grupo_recurso": "GRUPO_RECURSO_14",
+          "orden": "ORDEN_8600",
+          "operacion": 900020,
+          "partnumber": "PARTNUMBER_4754",
+          "minuto_laboral_inicio": 0.0,
+          "duracion_minutos": 1.194118
+        },
+        "ultima_operacion": {
+          "fecha_hora_fin": "2027-05-24 01:20:02.000",
+          "recurso": "RECURSO_183",
+          "grupo_recurso": "GRUPO_RECURSO_4",
+          "orden": "ORDEN_9043",
+          "operacion": 2200020,
+          "partnumber": "PARTNUMBER_420",
+          "minuto_laboral_fin": 380240.0405107277,
+          "duracion_minutos": 994.117647
+        }
+      },
+      "operaciones_sin_planificar": 0,
+      "parametros_extra": {
+        "objetivo": "solo duracion corta SPT"
+      }
+    }
+  }
+}

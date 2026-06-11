@@ -1,0 +1,2 @@
+modelo;filas_train_total;filas_validacion;accuracy;brier;logloss;train_loss_final;nodos_grafo;aristas_grafo;motivo_fallback
+fallback_riesgo_global;2328;0;;;;;12469;143201;No module named 'torch'
